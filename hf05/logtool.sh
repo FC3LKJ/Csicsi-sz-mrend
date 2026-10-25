@@ -120,8 +120,10 @@ report_ip() {
                 count[ip],ip,total?100*count[ip]/total:0
     }' "$file" |
         sort -k1,1nr |
-        head -n "$top" |
-        awk '{printf "%-20s %10d %8s%%\n",$2,$1,$3}'
+        awk -v top="$top" '
+        NR <= top {
+        printf "%-20s %10d %8s%%\n",$2,$1,$3
+        }'
 }
 
 report_errors() {
