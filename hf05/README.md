@@ -1,4 +1,3 @@
-csaba@DESKTOP-3HABTRV:~/Csicsi-sz-mrend/hf05$ ./logtool.sh --help
 Használat: ./logtool.sh [-q] [-h] [-f FILE] [-o FILE] [-s CODE] [-t N]
 
 Kapcsolók:
@@ -19,7 +18,6 @@ Példák:
 
 ---------------------------------
 
-csaba@DESKTOP-3HABTRV:~/Csicsi-sz-mrend/hf05$ ./logtool.sh
 Hiba: A bemeneti fájl nem olvasható vagy nem létezik: access.log
 
 Használat: ./logtool.sh [-q] [-h] [-f FILE] [-o FILE] [-s CODE] [-t N]
@@ -42,7 +40,6 @@ Példák:
 
 ----------------------------------
 
-csaba@DESKTOP-3HABTRV:~/Csicsi-sz-mrend/hf05$ ./logtool.sh -f nincs.log
 Hiba: A bemeneti fájl nem olvasható vagy nem létezik: nincs.log
 
 Használat: ./logtool.sh [-q] [-h] [-f FILE] [-o FILE] [-s CODE] [-t N]
@@ -65,7 +62,6 @@ Példák:
 
 ------------------------------------
 
-csaba@DESKTOP-3HABTRV:~/Csicsi-sz-mrend/hf05$ ./logtool.sh -f access.log -t 3
 === IP toplista ===
 193.224.41.77               730    18.25%
 10.0.145.200                  1     0.03%
@@ -92,9 +88,7 @@ Osszesen 4000 keres, 755 darab 4xx es 1242 darab 5xx hiba.
 
 -------------------------------------
 
-csaba@DESKTOP-3HABTRV:~/Csicsi-sz-mrend/hf05$ ./logtool.sh -f access.log -o riport.txt
 
-csaba@DESKTOP-3HABTRV:~/Csicsi-sz-mrend/hf05$ cat riport.txt
 === IP toplista ===
 193.224.41.77               730    18.25%
 10.0.145.200                  1     0.03%
@@ -135,12 +129,10 @@ Osszesen 4000 keres, 755 darab 4xx es 1242 darab 5xx hiba.
 
 ---------------------------------
 
-csaba@DESKTOP-3HABTRV:~/Csicsi-sz-mrend/hf05$ ./logtool.sh -f access.log -q
 Osszesen 4000 keres, 755 darab 4xx es 1242 darab 5xx hiba.
 
 -------------------------------
 
-csaba@DESKTOP-3HABTRV:~/Csicsi-sz-mrend/hf05$ ./logtool.sh -f access.log --izelevele
 Hiba: Ismeretlen kapcsoló vagy argumentum: --izelevele
 
 Használat: ./logtool.sh [-q] [-h] [-f FILE] [-o FILE] [-s CODE] [-t N]
@@ -160,4 +152,3 @@ Példák:
   ./logtool.sh -f access.log -o logrep.txt
   ./logtool.sh -f access.log -q
   ./logtool.sh -f access.log -s 500 -q -o logrep.txt
-csaba@DESKTOP-3HABTRV:~/Csicsi-sz-mrend/hf05$
