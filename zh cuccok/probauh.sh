@@ -2,7 +2,7 @@
 #!/bin/bash
 
 # ==========================================
-# HUTOOR.SH - Chat naploelemzo
+# BARLANG.SH - Chat naploelemzo
 # ==========================================
 
 # ---------- HIBAKEZELES ----------
@@ -15,9 +15,12 @@ hiba() {
 sugo() {
     cat <<'EOF'
 Hasznalat:
-  ./hutoor.sh NAPLO [KAPCSOLOK]
+  ./barlang.sh NAPLO [KAPCSOLOK]
 
 Kapcsolok:
+
+  -h
+      Segitseg megjelenitese.
 
   --help
       Segitseg megjelenitese.
@@ -49,20 +52,24 @@ Kapcsolok:
   --csak-privat
       Csak privat uzenetek.
 
-  --gyanustott
-      A top 3 gyanusitott pontozas alapjan.
+  --fotervezo
+      A top 3 foszervezo pontozas alapjan.
+  
+  --tuntetes
+      A tuntetes datuma es idopontja.
 
 Peldak:
 
-  ./hutoor.sh chat.log --attekintes
-  ./hutoor.sh chat.log --kivel Bence_305
-  ./hutoor.sh chat.log --beszelgetes Bence_305 Zsofi_310
-  ./hutoor.sh chat.log --export export
-  ./hutoor.sh chat.log --keres sajt
-  ./hutoor.sh chat.log --keres sajt --csak-privat
-  ./hutoor.sh chat.log --tol 2026-03-01 --ig 2026-03-31
-  ./hutoor.sh chat.log --csatorna "#konyha"
-  ./hutoor.sh chat.log --gyanustott
+  ./barlang.sh chatlog --attekintes
+  ./barlang.sh chatlog --kivel Bertold_a_Kovacs
+  ./barlang.sh chatlog --beszelgetes Bertold_a_Kovacs Hilda_a_Konyvtaros
+  ./barlang.sh chatlog --export export
+  ./barlang.sh chatlog --keres szerdan
+  ./barlang.sh chatlog --keres szerdan --csak-privat
+  ./barlang.sh chatlog --tol 2026-11-01 --ig 2026-11-30
+  ./barlang.sh chatlog --csatorna "#kozos"
+  ./barlang.sh chatlog --fotervezo
+  ./barlang.sh chatlog --tuntetes
 EOF
 }
 
@@ -161,8 +168,13 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
 
-        --gyanustott)
-            MODE="gyanustott"
+        --fotervezo)
+            MODE="fotervezo"
+            shift
+            ;;
+        
+        --tuntetes)
+            MODE="tuntetes"
             shift
             ;;
 
@@ -179,18 +191,7 @@ for datum in "$TOL" "$IG"; do
         [[ "$datum" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] ||
             hiba "Hibas datumformatum: $datum"
     fi
-done
-
-# ---------- KOZOS UZENETFELDOLGOZO ----------
-
-# A naplo ket formatuma:
-#
-# 2026-03-11T22:41:08 #emelet3 <Kata_312> szoveg
-#
-# 2026-03-12T09:02:11 @Kata_312 -> @Zsofi_310 : szoveg
-
-
-# ---------- 1. ATTEKINTES ----------
+done 
 
 if [[ "$MODE" == "attekintes" ]]; then
 
@@ -491,9 +492,9 @@ END {
 fi
 
 
-# ---------- 6. GYANUSITOTT PONTOZAS ----------
+# ---------- 6. FOTERVEZO PONTOZAS ----------
 
-if [[ "$MODE" == "gyanustott" ]]; then
+if [[ "$MODE" == "fotervezo" ]]; then
 
 awk '
 {
@@ -537,69 +538,35 @@ awk '
         privates[sender]++
 
     # 2. Hajnali aktivitas (01:00-03:59)
-    hour = substr(time, 12, 2)
+    hour = substr(time, 2, 5)
 
     if (hour ~ /^[0-9][0-9]$/ && hour >= 1 && hour <= 3)
         night[sender]++
 
     lower = tolower(message)
 
-    # 3. Panaszok felismerese
-    if (lower ~ /(panasz|elegem|ideges|bosszant|szar|rossz|megint|miert|miért)/)
+    # 3. Szervezesre utalo szavak
+    if (lower ~ /(tuntet|sztrajk|gyules|szavaz|kovetel|szervez)/)
         complaints[sender]++
-
-    # 4. Kerdes nelkuli mentegetozes
-    if (
-        lower ~ /(nem en|nem én|nem voltam|azt hittem|nem tudtam|elfelejt|bocs|ne haragudj|veletlen|véletlen|csak)/ &&
-        index(message, "?") == 0
-    )
-        excuses[sender]++
 }
 
-END {
-    # Atlagos panaszarany
-    for (u in users) {
-        rate = complaints[u] / users[u]
-        avg += rate
-        count++
-    }
-
-    if (count > 0)
-        avg /= count
-
-    for (u in users) {
-
-        rate = complaints[u] / users[u]
-
-        # Kevés panasz
-        low = 0
-
-        if (avg > 0 && rate < avg)
-            low = (avg - rate) / avg * 5
-
-        if (low > 5)
-            low = 5
+END { 
 
         # Hajnali aktivitas
         n = night[u] * 2
         if (n > 10)
             n = 10
 
-        # Mentegetozes
-        e = excuses[u] * 3
-        if (e > 15)
-            e = 15
-
         # Privat uzenetek
         p = privates[u]
         if (p > 10)
             p = 10
 
-        score = low + n + e + p
+        score = n + p
 
-        printf "%s\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%d\t%d\t%d\t%d\n", \
-            u, score, low, n, e, p, \
-            complaints[u], night[u], excuses[u], privates[u]
+        printf "%s\t%.2f\t%.2f\t%d\t%d\n", \
+            u, n, p, \
+            night[u], privates[u]
     }
 }
 ' "$logfile" |
@@ -608,20 +575,20 @@ head -n 3 |
 awk -F '\t' '
 
 BEGIN {
-    printf "\n========== TOP 3 GYANUSITOTT ==========\n\n"
+    printf "\n========== TOP 3 FOSZERVEZO ==========\n\n"
 
-    printf "%-20s %8s %8s %8s %8s %8s\n",
-        "Resztvevo", "Osszes", "Panasz", "Hajnali", "Menteget", "Privat"
+    printf "%-20s %8s %8s %8s %8s\n",
+        "Resztvevo", "Osszes", "Panasz", "Hajnali", "Privat"
 
     print "--------------------------------------------------------------------------"
 }
 
 {
-    printf "%-20s %8.2f %8.2f %8.2f %8.2f %8.2f\n",
-        $1, $2, $3, $4, $5, $6
+    printf "%-20s %8.2f %8.2f %8.2f %8.2f\n",
+        $1, $2, $3, $4, $5
 
-    printf "  Alapadatok: panasz=%d, hajnali=%d, mentegetozes=%d, privat=%d\n\n",
-        $7, $8, $9, $10
+    printf "  Alapadatok: panasz=%d, hajnali=%d, privat=%d\n\n",
+        $7, $8, $9
 }
 '
 
